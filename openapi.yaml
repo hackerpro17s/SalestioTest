@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Salestio API
+  description: |
+    Currency conversion and cart total summary API.
+
+    Endpoints currently return `501 Not Implemented` until request/response
+    contracts and business logic are defined.
+  version: 0.1.0
+servers:
+  - url: https://salestio.tenorium.local
+    description: Local Docker (TLS)
+paths:
+  /api/currency/convert:
+    post:
+      operationId: convertCurrency
+      summary: Convert currency amounts
+      description: Stub — implementation pending.
+      responses:
+        '501':
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotImplemented'
+  /api/cart/summary:
+    post:
+      operationId: summarizeCart
+      summary: Summarize cart total
+      description: Stub — implementation pending.
+      responses:
+        '501':
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotImplemented'
+components:
+  schemas:
+    NotImplemented:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Not implemented

@@ -20,12 +20,9 @@ final class CartSummaryRequest
         /**
          * Cart items keyed by product ID.
          *
-         * @var array<string, CartItem>
+         * @var array<int, CartItem>
          */
         #[Assert\NotBlank(message: 'Cart items are required')]
-        #[Assert\All([
-            new Assert\Valid(),
-        ])]
         public readonly array $items,
 
         /**

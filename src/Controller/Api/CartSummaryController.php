@@ -5,34 +5,32 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Contract\CartSummarizerInterface;
+use App\Dto\CartItem;
 use App\Dto\CartSummaryRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
+#[AsController]
 #[Route('/api/cart/summary', name: 'api_cart_summary', methods: ['POST'])]
 final class CartSummaryController extends AbstractApiController
 {
     public function __invoke(
         Request $request,
         CartSummarizerInterface $cartSummarizer,
-        #[MapRequestPayload(
-            deserializationContext: [AbstractNormalizer::DISABLE_TYPE_ENFORCEMENT => true]
-        )]
+        #[MapRequestPayload]
         CartSummaryRequest $dto,
     ): JsonResponse {
         // Deserialize items array into CartItem objects
         $items = [];
         foreach ($dto->items as $productId => $itemData) {
-            if (is_array($itemData)) {
-                $items[$productId] = new \App\Dto\CartItem(
-                    currency: $itemData['currency'],
-                    price: (float) $itemData['price'],
-                    quantity: (int) $itemData['quantity'],
-                );
-            }
+            $items[$productId] = new CartItem(
+                currency: $itemData->currency,
+                price: $itemData->price,
+                quantity: $itemData->quantity,
+            );
         }
 
         // Create a new CartSummaryRequest with properly typed items

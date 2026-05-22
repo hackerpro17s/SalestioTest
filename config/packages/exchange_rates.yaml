@@ -1,0 +1,5 @@
+parameters:
+    app.supported_currencies:
+        - USD
+        - EUR
+        - JPY

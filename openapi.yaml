@@ -6,10 +6,7 @@ info:
     [Open Exchange Rates](https://openexchangerates.org/).
 
     Rates are cached in the database and refreshed hourly via a scheduled task.
-
-    The cart summary endpoint returns `501 Not Implemented` until request/response
-    contracts are defined.
-  version: 0.2.0
+  version: 0.3.0
 servers:
   - url: https://salestio.tenorium.local
     description: Local Docker (TLS)
@@ -19,23 +16,125 @@ paths:
       operationId: summarizeCart
       summary: Summarize cart and convert currencies
       description: |
-        Stub — implementation pending.
+        Calculates the total price of cart items and converts to the requested currency.
 
-        Supported currencies (minimum): USD, EUR, JPY.
+        Supported currencies: USD, EUR, JPY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartSummaryRequest'
       responses:
-        '501':
-          description: Not implemented
+        '200':
+          description: Successful response with checkout price
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotImplemented'
+                $ref: '#/components/schemas/CartSummaryResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Server error (e.g., exchange rates not available)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
-    NotImplemented:
+    CartSummaryRequest:
       type: object
       required:
-        - message
+        - items
+        - checkoutCurrency
+      properties:
+        items:
+          type: object
+          description: Map of product ID to cart item
+          additionalProperties:
+            $ref: '#/components/schemas/CartItem'
+          example:
+            "42":
+              currency: EUR
+              price: 49.99
+              quantity: 1
+            "55":
+              currency: USD
+              price: 12
+              quantity: 3
+        checkoutCurrency:
+          type: string
+          enum:
+            - USD
+            - EUR
+            - JPY
+          description: ISO 4217 currency code to convert the total to
+          example: EUR
+    CartItem:
+      type: object
+      required:
+        - currency
+        - price
+        - quantity
+      properties:
+        currency:
+          type: string
+          enum:
+            - USD
+            - EUR
+            - JPY
+          description: ISO 4217 currency code for this item's price
+          example: EUR
+        price:
+          type: number
+          format: float
+          minimum: 0.01
+          description: Unit price of the item in the given currency
+          example: 49.99
+        quantity:
+          type: integer
+          minimum: 1
+          description: Quantity of this item in the cart
+          example: 1
+    CartSummaryResponse:
+      type: object
+      required:
+        - checkoutPrice
+        - checkoutCurrency
+      properties:
+        checkoutPrice:
+          type: number
+          format: float
+          description: Total checkout price converted to the requested currency, rounded to 2 decimal places
+          example: 82.18
+        checkoutCurrency:
+          type: string
+          description: ISO 4217 currency code of the checkout price
+          example: EUR
+    ValidationError:
+      type: object
       properties:
         message:
           type: string
-          example: Not implemented
+          example: Validation Failed
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            items:
+              - Cart items are required
+            checkoutCurrency:
+              - Checkout currency is required
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: An error occurred

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Contract;
 
 /**
- * Summarizes cart line items into a total for a target currency.
+ * Summarizes a cart and converts line amounts using stored exchange rates.
  *
  * Method signatures and DTOs will be added once request/response contracts are defined.
  */
-interface CartTotalSummarizerInterface
+interface CartSummarizerInterface
 {
 }

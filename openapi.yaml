@@ -2,32 +2,26 @@ openapi: 3.0.3
 info:
   title: Salestio API
   description: |
-    Currency conversion and cart total summary API.
+    Summarizes a cart and converts line amounts using exchange rates from
+    [Open Exchange Rates](https://openexchangerates.org/).
 
-    Endpoints currently return `501 Not Implemented` until request/response
-    contracts and business logic are defined.
-  version: 0.1.0
+    Rates are cached in the database and refreshed hourly via a scheduled task.
+
+    The cart summary endpoint returns `501 Not Implemented` until request/response
+    contracts are defined.
+  version: 0.2.0
 servers:
   - url: https://salestio.tenorium.local
     description: Local Docker (TLS)
 paths:
-  /api/currency/convert:
-    post:
-      operationId: convertCurrency
-      summary: Convert currency amounts
-      description: Stub — implementation pending.
-      responses:
-        '501':
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotImplemented'
   /api/cart/summary:
     post:
       operationId: summarizeCart
-      summary: Summarize cart total
-      description: Stub — implementation pending.
+      summary: Summarize cart and convert currencies
+      description: |
+        Stub — implementation pending.
+
+        Supported currencies (minimum): USD, EUR, JPY.
       responses:
         '501':
           description: Not implemented

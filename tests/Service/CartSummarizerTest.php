@@ -29,6 +29,10 @@ final class CartSummarizerTest extends TestCase
 
     public function testSummarizeWithSameCurrency(): void
     {
+        $this->exchangeRateRepository
+            ->expects($this->never())
+            ->method('findOneByCurrency');
+
         $request = new CartSummaryRequest(
             items: [
                 new CartItem('EUR', 10.00, 2),
@@ -39,7 +43,6 @@ final class CartSummarizerTest extends TestCase
 
         $response = $this->cartSummarizer->summarize($request);
 
-        self::assertInstanceOf(CartSummaryResponse::class, $response);
         self::assertEquals(40.00, $response->checkoutPrice);
         self::assertEquals('EUR', $response->checkoutCurrency);
     }
@@ -48,7 +51,7 @@ final class CartSummarizerTest extends TestCase
     {
         // Set up EUR exchange rate (1 USD = 0.89475 EUR)
         $eurRate = $this->createMock(ExchangeRate::class);
-        $eurRate->method('getRate')->willReturn('0.89475');
+        $eurRate->expects($this->once())->method('getRate')->willReturn('0.89475');
 
         $this->exchangeRateRepository
             ->expects(self::once())
@@ -66,7 +69,6 @@ final class CartSummarizerTest extends TestCase
 
         $response = $this->cartSummarizer->summarize($request);
 
-        self::assertInstanceOf(CartSummaryResponse::class, $response);
         self::assertEqualsWithDelta(32.21, $response->checkoutPrice, 0.01);
         self::assertEquals('EUR', $response->checkoutCurrency);
     }
@@ -80,7 +82,7 @@ final class CartSummarizerTest extends TestCase
 
         // Set up EUR exchange rate (1 USD = 0.89475 EUR)
         $eurRate = $this->createMock(ExchangeRate::class);
-        $eurRate->method('getRate')->willReturn('0.89475');
+        $eurRate->expects($this->once())->method('getRate')->willReturn('0.89475');
 
         $this->exchangeRateRepository
             ->expects(self::once())
@@ -98,7 +100,6 @@ final class CartSummarizerTest extends TestCase
 
         $response = $this->cartSummarizer->summarize($request);
 
-        self::assertInstanceOf(CartSummaryResponse::class, $response);
         // 49.99 EUR + (36 USD * 0.89475) = 49.99 + 32.211 = 82.201 ≈ 82.20
         self::assertEqualsWithDelta(82.20, $response->checkoutPrice, 0.01);
         self::assertEquals('EUR', $response->checkoutCurrency);
@@ -108,7 +109,7 @@ final class CartSummarizerTest extends TestCase
     {
         // Set up EUR exchange rate (1 USD = 0.89475 EUR)
         $eurRate = $this->createMock(ExchangeRate::class);
-        $eurRate->method('getRate')->willReturn('0.89475');
+        $eurRate->expects($this->once())->method('getRate')->willReturn('0.89475');
 
         $this->exchangeRateRepository
             ->expects(self::once())
@@ -126,7 +127,6 @@ final class CartSummarizerTest extends TestCase
 
         $response = $this->cartSummarizer->summarize($request);
 
-        self::assertInstanceOf(CartSummaryResponse::class, $response);
         self::assertEqualsWithDelta(100.00, $response->checkoutPrice, 0.01);
         self::assertEquals('USD', $response->checkoutCurrency);
     }
@@ -135,7 +135,7 @@ final class CartSummarizerTest extends TestCase
     {
         // Set up JPY exchange rate (1 USD = 150 JPY)
         $jpyRate = $this->createMock(ExchangeRate::class);
-        $jpyRate->method('getRate')->willReturn('150');
+        $jpyRate->expects($this->once())->method('getRate')->willReturn('150');
 
         $this->exchangeRateRepository
             ->expects(self::once())
@@ -153,7 +153,6 @@ final class CartSummarizerTest extends TestCase
 
         $response = $this->cartSummarizer->summarize($request);
 
-        self::assertInstanceOf(CartSummaryResponse::class, $response);
         self::assertEquals(15000.00, $response->checkoutPrice);
         self::assertEquals('JPY', $response->checkoutCurrency);
     }
@@ -181,6 +180,10 @@ final class CartSummarizerTest extends TestCase
 
     public function testSummarizeThrowsExceptionForUnsupportedCurrency(): void
     {
+        $this->exchangeRateRepository
+            ->expects($this->never())
+            ->method('findOneByCurrency');
+
         $request = new CartSummaryRequest(
             items: [
                 new CartItem('GBP', 10.00, 1),
@@ -196,6 +199,10 @@ final class CartSummarizerTest extends TestCase
 
     public function testSummarizeWithEmptyCart(): void
     {
+        $this->exchangeRateRepository
+            ->expects($this->never())
+            ->method('findOneByCurrency');
+
         $request = new CartSummaryRequest(
             items: [],
             checkoutCurrency: 'USD',
@@ -203,7 +210,6 @@ final class CartSummarizerTest extends TestCase
 
         $response = $this->cartSummarizer->summarize($request);
 
-        self::assertInstanceOf(CartSummaryResponse::class, $response);
         self::assertEquals(0.00, $response->checkoutPrice);
         self::assertEquals('USD', $response->checkoutCurrency);
     }
